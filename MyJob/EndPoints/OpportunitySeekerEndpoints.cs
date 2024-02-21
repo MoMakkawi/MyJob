@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
+using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
 public static class OpportunitySeekerEndpoints
@@ -68,13 +69,12 @@ public static class OpportunitySeekerEndpoints
 
     private static void GetOpportunitySeekerByIdEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<OpportunitySeeker>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/{id}", async Task<Results<Ok<OpportunitySeekerDTO>, NotFound>> (int id, MyJobContext db) =>
         {
             return await db.OpportunitySeekers.AsNoTracking()
                 .FirstOrDefaultAsync(model => model.Id == id)
-                is OpportunitySeeker model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
+                is not OpportunitySeeker model ? TypedResults.NotFound()
+                    : TypedResults.Ok(model.ToDTO());
         })
         .WithName("GetOpportunitySeekerById")
         .WithOpenApi();
@@ -84,7 +84,9 @@ public static class OpportunitySeekerEndpoints
     {
         group.MapGet("/", async (MyJobContext db) =>
         {
-            return await db.OpportunitySeekers.ToListAsync();
+            return await db.OpportunitySeekers
+            .Select(os => os.ToDTO())
+            .ToListAsync();
         })
         .WithName("GetAllOpportunitySeekers")
         .WithOpenApi();

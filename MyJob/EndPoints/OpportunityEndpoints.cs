@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
 using System.Reflection;
+using System.Text;
+using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
 public static class OpportunityEndpoints
@@ -74,7 +76,7 @@ public static class OpportunityEndpoints
             .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .Select(prop => new { prop.PropertyType, prop.Name });
 
-        group.MapGet("/search", async Task<Results<Ok<List<Opportunity>>, BadRequest<string>>> (MyJobContext db, HttpContext context) =>
+        group.MapGet("/search", async Task<Results<Ok<List<OpportunityDTO>>, BadRequest<string>>> (MyJobContext db, HttpContext context) =>
         {
             var queryParameters = context.Request.Query
             .ToDictionary(k => k.Key, v => v.Value.ToString());
@@ -91,14 +93,21 @@ public static class OpportunityEndpoints
                     Value = (dynamic)Convert.ChangeType(queryParameter.Value, opportunityPropertie.PropertyType)
                 };
 
-                //var sql = "SELECT * FROM Opportunities WHERE " + string.Join() 
+                StringBuilder sqlParameters = new();
 
-                var results = await db.Opportunities.FromSql($"sql").ToListAsync();
+                if(parameters.Count() > 2)
+                    for (int i = 0; i < parameters.Count() -1; i++) 
+                        sqlParameters.Append($"{parameters.First().Name} = {parameters.First().Value} and ");
 
+                sqlParameters.Append($"{parameters.Last().Name} = {parameters.Last().Value}");
 
-                return TypedResults.Ok(results);
+                var results = await db.Opportunities
+                .FromSql($"SELECT * FROM Opportunities WHERE {sqlParameters}")
+                .ToListAsync();
 
-
+                return TypedResults.Ok(results
+                    .Select(o => o.ToDTO())
+                    .ToList());
             }
             catch (Exception ex)
             {
@@ -111,12 +120,12 @@ public static class OpportunityEndpoints
 
     private static void GetOpportunityByIdEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<Opportunity>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/{id}", async Task<Results<Ok<OpportunityDTO>, NotFound>> (int id, MyJobContext db) =>
         {
             return await db.Opportunities.AsNoTracking()
                 .FirstOrDefaultAsync(model => model.Id == id)
                 is Opportunity model
-                    ? TypedResults.Ok(model)
+                    ? TypedResults.Ok(model.ToDTO())
                     : TypedResults.NotFound();
         })
         .WithName("GetOpportunityById")
@@ -127,7 +136,9 @@ public static class OpportunityEndpoints
     {
         group.MapGet("/", async (MyJobContext db) =>
         {
-            return await db.Opportunities.ToListAsync();
+            return await db.Opportunities
+            .Select(o => o.ToDTO())
+            .ToListAsync();
         })
         .WithName("GetAllOpportunities")
         .WithOpenApi();

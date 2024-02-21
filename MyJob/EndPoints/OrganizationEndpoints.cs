@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
+using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
 public static class OrganizationEndpoints
@@ -67,13 +68,12 @@ public static class OrganizationEndpoints
 
     private static void GetOrganizationByIdEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<Organization>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/{id}", async Task<Results<Ok<OrganizationDTO>, NotFound>> (int id, MyJobContext db) =>
         {
             return await db.Organizations.AsNoTracking()
-                .FirstOrDefaultAsync(model => model.Id == id)
-                is Organization model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
+            .FirstOrDefaultAsync(model => model.Id == id)
+                is not Organization model? TypedResults.NotFound()
+                    : TypedResults.Ok(model.ToDTO());
         })
         .WithName("GetOrganizationById")
         .WithOpenApi();
@@ -81,9 +81,9 @@ public static class OrganizationEndpoints
 
     private static void GetAllOrganizationsEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/", async (MyJobContext db) =>
+        group.MapGet("/", (MyJobContext db) =>
         {
-            return await db.Organizations.ToListAsync();
+            return db.Organizations.Select(model => model.ToDTO());
         })
         .WithName("GetAllOrganizations")
         .WithOpenApi();

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using MyJob.DTOs;
+
 namespace MyJob.Models;
 
 public class Opportunity
@@ -23,6 +25,17 @@ public class Opportunity
         var startDateTime = DateTime.Parse(StartDate.ToString());
         var daysNumber = endDateTime.Subtract(startDateTime).TotalDays;
 
-        return (int) Math.Ceiling(daysNumber / 30);
+        return (int)Math.Ceiling(daysNumber / 30);
     }
+
+    public OpportunityDTO ToDTO()
+        => new(Id,
+               Title,
+               StartDate,
+               EndDate,
+               Type,
+               MonthsNumber,
+               Organization?.ToDTO());
+    
+
 }
