@@ -8,6 +8,7 @@ public class OpportunitySeeker : User
     internal int PracticalExperienceMonthsNumber => Experiences
            .Aggregate(0, (total, experience) =>
                experience.Type == OpportunityType.Work ? total + experience.MonthsNumber : total);
+
     [NotMapped]
     internal int PracticalVolunteerMonthsNumber => Experiences
            .Aggregate(0, (total, experience) =>
