@@ -1,6 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using MyJob.Database;
 using MyJob.DTOs;
 
 namespace MyJob.Models;
@@ -20,7 +20,7 @@ public class OpportunitySeeker : User
     public virtual FileData? CV { get; set; } = null!;
     public int? CVId { get; set; }
 
-    public OpportunitySeekerDTO ToDTO()
+    public OpportunitySeekerDTO ToDTO(MyJobContext db)
         => new (Id,
                FirstName,
                Email,
@@ -30,6 +30,6 @@ public class OpportunitySeeker : User
                Picture?.Path,
                PracticalExperienceMonthsNumber,
                VolunteerExperienceMonthsNumber,
-               Experiences.Select(o => o.ToDTO()).ToList(),
+               Experiences.Select(o => o.ToDTO(db)).ToList(),
                CV?.Path);
 }

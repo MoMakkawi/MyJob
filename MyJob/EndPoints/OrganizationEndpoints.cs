@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
-using MyJob.DTOs;
+using MyJob.DTOs.OrganizationDTOs;
 namespace MyJob.EndPoints;
 
 public static class OrganizationEndpoints
@@ -17,7 +17,61 @@ public static class OrganizationEndpoints
         CreateOrganizationEndPoint(group);
         DeleteOrganizationEndPoint(group);
     }
+    private static void CreateOrganizationEndPoint(RouteGroupBuilder group)
+    {
+        group.MapPost("/", async (CommandDTO createOrganizationDTO, MyJobContext db) =>
+        {
+            var picture = await db.Files
+            .FindAsync(createOrganizationDTO.PictureId);
 
+            var organization = new Organization()
+            {
+                FirstName = createOrganizationDTO.FirstName,
+                LastName = createOrganizationDTO.LastName,
+                Email = createOrganizationDTO.Email,
+                About = createOrganizationDTO.About,
+                Password = createOrganizationDTO.Password,
+                PhoneNumber = createOrganizationDTO.PhoneNumber,
+                Specialty = createOrganizationDTO.Specialty,
+                Picture = picture
+            };
+
+            db.Organizations.Add(organization);
+            await db.SaveChangesAsync();
+            return TypedResults.Created($"/api/Organization/{organization.Id}", organization);
+        })
+        .WithName("CreateOrganization")
+        .WithOpenApi();
+    }
+
+    private static void UpdateOrganizationEndPoint(RouteGroupBuilder group)
+    {
+        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, CommandDTO organizationDTO, MyJobContext db) =>
+        {
+
+            var organizationPicture = db.Organizations
+                .SingleOrDefault(model => model.Id == id)?
+                .Picture;
+            int? organizationPictureId = organizationPicture?.Id;
+
+            var affected = await db.Organizations
+                .Where(model => model.Id == id)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(m => m.FirstName, organizationDTO.FirstName)
+                    .SetProperty(m => m.LastName, organizationDTO.LastName)
+                    .SetProperty(m => m.Email, organizationDTO.Email)
+                    .SetProperty(m => m.Password, organizationDTO.Password)
+                    .SetProperty(m => m.PhoneNumber, organizationDTO.PhoneNumber)
+                    .SetProperty(m => m.Specialty, organizationDTO.Specialty)
+                    .SetProperty(m => m.About, organizationDTO.About)
+                    .SetProperty(m => m.PictureId, organizationPictureId)
+                    );
+
+            return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
+        })
+        .WithName("UpdateOrganization")
+        .WithOpenApi();
+    }
     private static void DeleteOrganizationEndPoint(RouteGroupBuilder group)
     {
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (int id, MyJobContext db) =>
@@ -31,49 +85,14 @@ public static class OrganizationEndpoints
         .WithOpenApi();
     }
 
-    private static void CreateOrganizationEndPoint(RouteGroupBuilder group)
-    {
-        group.MapPost("/", async (Organization organization, MyJobContext db) =>
-        {
-            db.Organizations.Add(organization);
-            await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Organization/{organization.Id}", organization);
-        })
-        .WithName("CreateOrganization")
-        .WithOpenApi();
-    }
-
-    private static void UpdateOrganizationEndPoint(RouteGroupBuilder group)
-    {
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, Organization organization, MyJobContext db) =>
-        {
-            var affected = await db.Organizations
-                .Where(model => model.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.Id, organization.Id)
-                    .SetProperty(m => m.FirstName, organization.FirstName)
-                    .SetProperty(m => m.LastName, organization.LastName)
-                    .SetProperty(m => m.Email, organization.Email)
-                    .SetProperty(m => m.Password, organization.Password)
-                    .SetProperty(m => m.PhoneNumber, organization.PhoneNumber)
-                    .SetProperty(m => m.Specialty, organization.Specialty)
-                    .SetProperty(m => m.About, organization.About)
-                    .SetProperty(m => m.PictureId, organization.PictureId)
-                    );
-            return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
-        })
-        .WithName("UpdateOrganization")
-        .WithOpenApi();
-    }
-
     private static void GetOrganizationByIdEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<OrganizationDTO>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/{id}", async Task<Results<Ok<QueryDTO>, NotFound>> (int id, MyJobContext db) =>
         {
             return await db.Organizations.AsNoTracking()
             .FirstOrDefaultAsync(model => model.Id == id)
                 is not Organization model? TypedResults.NotFound()
-                    : TypedResults.Ok(model.ToDTO());
+                    : TypedResults.Ok(model.ToDTO(db));
         })
         .WithName("GetOrganizationById")
         .WithOpenApi();
@@ -83,7 +102,7 @@ public static class OrganizationEndpoints
     {
         group.MapGet("/", (MyJobContext db) =>
         {
-            return db.Organizations.Select(model => model.ToDTO());
+            return db.Organizations.Select(model => model.ToDTO(db));
         })
         .WithName("GetAllOrganizations")
         .WithOpenApi();

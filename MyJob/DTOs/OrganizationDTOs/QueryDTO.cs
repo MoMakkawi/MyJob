@@ -1,6 +1,6 @@
-﻿namespace MyJob.DTOs;
+﻿namespace MyJob.DTOs.OrganizationDTOs;
 
-public record OrganizationDTO(
+public record QueryDTO(
     int Id,
     string FullName,
     string Email,

@@ -9,4 +9,5 @@ public record OpportunityDTO(
     DateOnly EndDate,
     OpportunityType Type,
     int MonthsNumber,
-    OrganizationDTO? OrganizationDTO);
+    string OrganizationFullName,
+    int? OrganizationId);

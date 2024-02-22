@@ -1,6 +1,5 @@
-﻿using System;
-
-using MyJob.DTOs;
+﻿using MyJob.Database;
+using MyJob.DTOs.OrganizationDTOs;
 
 namespace MyJob.Models;
 
@@ -8,7 +7,7 @@ public class Organization : User
 {
     public virtual ICollection<Opportunity> Opportunities { get; set; } = [];
 
-    public OrganizationDTO ToDTO()
+    public QueryDTO ToDTO(MyJobContext db)
         => new(Id,
                FirstName,
                Email,
@@ -16,5 +15,5 @@ public class Organization : User
                Specialty,
                About,
                Picture?.Path,
-               Opportunities.Select(o => o.ToDTO()).ToList());
+               Opportunities.Select(o => o.ToDTO(db)).ToList());
 }

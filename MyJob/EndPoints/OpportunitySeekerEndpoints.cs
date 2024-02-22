@@ -50,8 +50,6 @@ public static class OpportunitySeekerEndpoints
             var affected = await db.OpportunitySeekers
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.CVId, opportunitySeeker.CVId)
-                    .SetProperty(m => m.Id, opportunitySeeker.Id)
                     .SetProperty(m => m.FirstName, opportunitySeeker.FirstName)
                     .SetProperty(m => m.LastName, opportunitySeeker.LastName)
                     .SetProperty(m => m.Email, opportunitySeeker.Email)
@@ -59,6 +57,7 @@ public static class OpportunitySeekerEndpoints
                     .SetProperty(m => m.PhoneNumber, opportunitySeeker.PhoneNumber)
                     .SetProperty(m => m.Specialty, opportunitySeeker.Specialty)
                     .SetProperty(m => m.About, opportunitySeeker.About)
+                    .SetProperty(m => m.CVId, opportunitySeeker.CVId)
                     .SetProperty(m => m.PictureId, opportunitySeeker.PictureId)
                     );
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
@@ -74,7 +73,7 @@ public static class OpportunitySeekerEndpoints
             return await db.OpportunitySeekers.AsNoTracking()
                 .FirstOrDefaultAsync(model => model.Id == id)
                 is not OpportunitySeeker model ? TypedResults.NotFound()
-                    : TypedResults.Ok(model.ToDTO());
+                    : TypedResults.Ok(model.ToDTO(db));
         })
         .WithName("GetOpportunitySeekerById")
         .WithOpenApi();
@@ -85,7 +84,7 @@ public static class OpportunitySeekerEndpoints
         group.MapGet("/", async (MyJobContext db) =>
         {
             return await db.OpportunitySeekers
-            .Select(os => os.ToDTO())
+            .Select(os => os.ToDTO(db))
             .ToListAsync();
         })
         .WithName("GetAllOpportunitySeekers")

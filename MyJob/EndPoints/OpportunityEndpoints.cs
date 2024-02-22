@@ -38,7 +38,11 @@ public static class OpportunityEndpoints
     {
         group.MapPost("/", async (Opportunity opportunity, MyJobContext db) =>
         {
-            db.Opportunities.Add(opportunity);
+            if (opportunity.OrganizationId is null) db.Opportunities.Add(opportunity);
+            else db.Organizations
+                .First(org => org.Id == opportunity.OrganizationId)
+                .Opportunities.Add(opportunity);
+
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Opportunity/{opportunity.Id}", opportunity);
         })
@@ -53,11 +57,11 @@ public static class OpportunityEndpoints
             var affected = await db.Opportunities
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.Id, opportunity.Id)
                     .SetProperty(m => m.Title, opportunity.Title)
                     .SetProperty(m => m.StartDate, opportunity.StartDate)
                     .SetProperty(m => m.EndDate, opportunity.EndDate)
                     .SetProperty(m => m.Type, opportunity.Type)
+                    .SetProperty(m => m.OrganizationFullName, opportunity.OrganizationFullName)
                     .SetProperty(m => m.OrganizationId, opportunity.OrganizationId)
                     );
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
@@ -106,7 +110,7 @@ public static class OpportunityEndpoints
                 .ToListAsync();
 
                 return TypedResults.Ok(results
-                    .Select(o => o.ToDTO())
+                    .Select(o => o.ToDTO(db))
                     .ToList());
             }
             catch (Exception ex)
@@ -125,7 +129,7 @@ public static class OpportunityEndpoints
             return await db.Opportunities.AsNoTracking()
                 .FirstOrDefaultAsync(model => model.Id == id)
                 is Opportunity model
-                    ? TypedResults.Ok(model.ToDTO())
+                    ? TypedResults.Ok(model.ToDTO(db))
                     : TypedResults.NotFound();
         })
         .WithName("GetOpportunityById")
@@ -137,7 +141,7 @@ public static class OpportunityEndpoints
         group.MapGet("/", async (MyJobContext db) =>
         {
             return await db.Opportunities
-            .Select(o => o.ToDTO())
+            .Select(o => o.ToDTO(db))
             .ToListAsync();
         })
         .WithName("GetAllOpportunities")
