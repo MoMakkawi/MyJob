@@ -11,8 +11,7 @@ public static class OrganizationEndpoints
     {
         var group = routes.MapGroup("/api/Organization").WithTags(nameof(Organization));
 
-        GetAllOrganizationsEndPoint(group);
-        GetOrganizationByIdEndPoint(group);
+        SearchOrganizationsEndPoint(group);
         UpdateOrganizationEndPoint(group);
         CreateOrganizationEndPoint(group);
         DeleteOrganizationEndPoint(group);
@@ -85,26 +84,37 @@ public static class OrganizationEndpoints
         .WithOpenApi();
     }
 
-    private static void GetOrganizationByIdEndPoint(RouteGroupBuilder group)
+    private static void SearchOrganizationsEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<QueryDTO>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/", (
+            int? Id,
+            string? FullName,
+            string? Email,
+            string? PhoneNumber,
+            string? Specialty,
+            MyJobContext db) =>
         {
-            return await db.Organizations.AsNoTracking()
-            .FirstOrDefaultAsync(model => model.Id == id)
-                is not Organization model? TypedResults.NotFound()
-                    : TypedResults.Ok(model.ToDTO(db));
+            var organizations = db.Organizations.AsEnumerable();
+
+            if(Id is not null)
+                organizations = organizations.Where(o => o.Id == Id);
+
+            if (FullName is not null)
+                organizations = organizations.Where(o => o.FullName.Contains(FullName));
+
+            if (Email is not null)
+                organizations = organizations.Where(o => o.Email == Email);
+
+            if (Specialty is not null)
+                organizations = organizations.Where(o => o.Specialty == Specialty);
+
+            if (PhoneNumber is not null)
+                organizations = organizations.Where(o => o.PhoneNumber == PhoneNumber);
+
+            return organizations.Select(model => model.ToDTO(db));
         })
-        .WithName("GetOrganizationById")
+        .WithName("SearchOrganizations")
         .WithOpenApi();
     }
 
-    private static void GetAllOrganizationsEndPoint(RouteGroupBuilder group)
-    {
-        group.MapGet("/", (MyJobContext db) =>
-        {
-            return db.Organizations.Select(model => model.ToDTO(db));
-        })
-        .WithName("GetAllOrganizations")
-        .WithOpenApi();
-    }
 }

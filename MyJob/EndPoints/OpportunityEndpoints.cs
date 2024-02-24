@@ -14,7 +14,7 @@ public static class OpportunityEndpoints
         UpdateOpportunityEndPoint(group);
         CreateOpportunityEndPoint(group);
         DeleteOpportunityEndPoint(group);
-        OpportunitiesSearchEndPoint(group);
+        SearchOpportunitiesEndPoint(group);
     }
 
     private static void DeleteOpportunityEndPoint(RouteGroupBuilder group)
@@ -66,10 +66,9 @@ public static class OpportunityEndpoints
         .WithOpenApi();
     }
 
-    private static void OpportunitiesSearchEndPoint(RouteGroupBuilder group)
+    private static void SearchOpportunitiesEndPoint(RouteGroupBuilder group)
     {
-  
-        group.MapGet("/search", (
+        group.MapGet("/", (
             int? Id,
             string? Title,
             DateOnly? StartDate,
@@ -109,7 +108,7 @@ public static class OpportunityEndpoints
             return opportunities
             .Select(o => o.ToDTO(db));
         })
-        .WithName("OpportunitiesSearch")
+        .WithName("SearchOpportunities")
         .WithOpenApi();
     }
 }

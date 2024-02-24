@@ -10,7 +10,7 @@ public static class OpportunitySeekerEndpoints
     {
         var group = routes.MapGroup("/api/OpportunitySeeker").WithTags(nameof(OpportunitySeeker));
 
-        OpportunitySeekersSearchEndPoint(group);
+        SearchOpportunitySeekersEndPoint(group);
         UpdateOpportunitySeekerEndPoint(group);
         CreateOpportunitySeekerEndPoint(group);
         DeleteOpportunitySeekerEndPoint(group);
@@ -63,9 +63,9 @@ public static class OpportunitySeekerEndpoints
         .WithName("UpdateOpportunitySeeker")
         .WithOpenApi();
     }
-    private static void OpportunitySeekersSearchEndPoint(RouteGroupBuilder group)
+    private static void SearchOpportunitySeekersEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/search", (
+        group.MapGet("/", (
             int? Id,
             string? FullName,
             string? Email,
