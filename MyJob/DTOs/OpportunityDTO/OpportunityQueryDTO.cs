@@ -10,7 +10,7 @@ public record OpportunityQueryDTO(
     OpportunityType Type,
     int MonthsNumber,
 
-    int[] ApplicantsCVIds,
+    int[] ApplicantsIds,
 
     string OrganizationFullName,
     int? OrganizationId);

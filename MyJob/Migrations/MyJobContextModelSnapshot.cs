@@ -56,7 +56,7 @@ namespace MyJob.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicantsCVIds")
+                    b.Property<string>("ApplicantsIds")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

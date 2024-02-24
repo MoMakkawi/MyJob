@@ -16,7 +16,7 @@ public class Opportunity
     public string OrganizationFullName { get; set; } = string.Empty;
     public int? OrganizationId { get; set; }
 
-    public int[] ApplicantsCVIds { get; set; } = [];
+    public int[] ApplicantsIds { get; set; } = [];
 
     [NotMapped]
     internal int MonthsNumber => GetMonthsNumber();
@@ -37,7 +37,7 @@ public class Opportunity
                EndDate,
                Type,
                MonthsNumber,
-               ApplicantsCVIds,
+               ApplicantsIds,
                OrganizationId == null ? OrganizationFullName : db.Organizations
                     .FirstOrDefault(o => o.Id == OrganizationId)?.FullName!,
                OrganizationId);

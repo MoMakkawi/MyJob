@@ -55,7 +55,7 @@ public static class OpportunityEndpoints
                     .SetProperty(m => m.EndDate, opportunity.EndDate)
                     .SetProperty(m => m.Type, opportunity.Type)
                     .SetProperty(m => m.OrganizationFullName, opportunity.OrganizationFullName)
-                    .SetProperty(m =>m.ApplicantsCVIds, opportunity.ApplicantsCVIds)
+                    .SetProperty(m =>m.ApplicantsIds, opportunity.ApplicantsIds)
                     .SetProperty(m => m.OrganizationId, opportunity.OrganizationId)
                     );
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
@@ -65,17 +65,29 @@ public static class OpportunityEndpoints
     }
     private static void GetOpportunityApplicantCVsEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/applicants-cv-paths/id={id}", async (int? id, MyJobContext db) =>
+        group.MapGet("/applicants/id={id}", async (int? id, MyJobContext db) =>
         {
             var opportunity = await db.Opportunities.FindAsync(id);
 
             return opportunity is null ? Results.NotFound() :
-            Results.Ok(from applicantsCVId in opportunity.ApplicantsCVIds
-                              from fileData in db.Files
-                              where fileData.Id == applicantsCVId && File.Exists(fileData.Path)
-                              select new { fileData.Path });
+            Results.Ok(from applicantId in opportunity.ApplicantsIds
+                        from seeker in db.OpportunitySeekers
+                        where seeker.Id == applicantId &&
+                              seeker.CV is not null &&
+                              File.Exists(seeker.CV.Path)
+                        select new
+                        {
+                            seeker.Id,
+                            seeker.About,
+                            seeker.FullName,
+                            seeker.PhoneNumber,
+                            seeker.Email,
+                            seeker.PracticalExperienceMonthsNumber,
+                            seeker.VolunteerExperienceMonthsNumber,
+                            seeker.CV!.Path
+                        } );
         })
-        .WithName("GetOpportunityApplicantCVs")
+        .WithName("GetOpportunityApplicant")
         .WithOpenApi();
     }
     private static void SearchOpportunitiesEndPoint(RouteGroupBuilder group)
