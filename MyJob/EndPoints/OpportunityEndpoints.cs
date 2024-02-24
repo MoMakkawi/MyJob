@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
-using System.Reflection;
-using System.Text;
 using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
@@ -13,8 +11,6 @@ public static class OpportunityEndpoints
     {
         var group = routes.MapGroup("/api/Opportunity").WithTags(nameof(Opportunity));
 
-        GetAllOpportunitiesEndPoint(group);
-        GetOpportunityByIdEndPoint(group);
         UpdateOpportunityEndPoint(group);
         CreateOpportunityEndPoint(group);
         DeleteOpportunityEndPoint(group);
@@ -72,79 +68,49 @@ public static class OpportunityEndpoints
 
     private static void OpportunitiesSearchEndPoint(RouteGroupBuilder group)
     {
-        // get the type of the class
-        Type opportunityType = typeof(Opportunity);
-
-        // get all the properties with the specified binding flags
-        var opportunityProperties = opportunityType
-            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Select(prop => new { prop.PropertyType, prop.Name });
-
-        group.MapGet("/search", async Task<Results<Ok<List<OpportunityDTO>>, BadRequest<string>>> (MyJobContext db, HttpContext context) =>
+  
+        group.MapGet("/search", List<OpportunityDTO> (
+            int? Id,
+            string? Title,
+            DateOnly? StartDate,
+            DateOnly? EndDate,
+            OpportunityType? Type,
+            int? MonthsNumber,
+            string? OrganizationFullName,
+            int? OrganizationId,
+            MyJobContext db) =>
         {
-            var queryParameters = context.Request.Query
-            .ToDictionary(k => k.Key, v => v.Value.ToString());
+            var opportunities = db.Opportunities.AsEnumerable();
 
-            try
-            {
-                var parameters =
-                from opportunityPropertie in opportunityProperties
-                from queryParameter in queryParameters
-                where opportunityPropertie.Name == queryParameter.Key
-                select new
-                {
-                    opportunityPropertie.Name,
-                    Value = (dynamic)Convert.ChangeType(queryParameter.Value, opportunityPropertie.PropertyType)
-                };
+            if (Id is not null)
+                opportunities = opportunities.Where(o => o.Id == Id);
 
-                StringBuilder sqlParameters = new();
+            if (OrganizationId is not null)
+                opportunities = opportunities.Where(o => o.OrganizationId == OrganizationId);
 
-                if(parameters.Count() > 2)
-                    for (int i = 0; i < parameters.Count() -1; i++) 
-                        sqlParameters.Append($"{parameters.First().Name} = {parameters.First().Value} and ");
+            if (Title is not null)
+                opportunities = opportunities.Where(o => o.Title == Title);
 
-                sqlParameters.Append($"{parameters.Last().Name} = {parameters.Last().Value}");
+            if (Type is not null)
+                opportunities = opportunities.Where(o => o.Type == Type);
 
-                var results = await db.Opportunities
-                .FromSql($"SELECT * FROM Opportunities WHERE {sqlParameters}")
-                .ToListAsync();
+            if (StartDate is not null)
+                opportunities = opportunities.Where(o => o.StartDate == StartDate);
 
-                return TypedResults.Ok(results
-                    .Select(o => o.ToDTO(db))
-                    .ToList());
-            }
-            catch (Exception ex)
-            {
-                return TypedResults.BadRequest($"{ex.Message} ,{ex.StackTrace}");
-            }
+            if (EndDate is not null)
+                opportunities = opportunities.Where(o => o.EndDate == EndDate);
+
+            if (MonthsNumber is not null)
+                opportunities = opportunities.Where(o => o.MonthsNumber == MonthsNumber);
+            
+            if (OrganizationFullName is not null)
+                opportunities = opportunities.Where(o => o.OrganizationFullName.Contains(OrganizationFullName));
+
+            return opportunities
+            .Select(o => o.ToDTO(db))
+            .ToList();
         })
         .WithName("OpportunitiesSearch")
-        .WithOpenApi();
-    }
-
-    private static void GetOpportunityByIdEndPoint(RouteGroupBuilder group)
-    {
-        group.MapGet("/{id}", async Task<Results<Ok<OpportunityDTO>, NotFound>> (int id, MyJobContext db) =>
-        {
-            return await db.Opportunities.AsNoTracking()
-                .FirstOrDefaultAsync(model => model.Id == id)
-                is Opportunity model
-                    ? TypedResults.Ok(model.ToDTO(db))
-                    : TypedResults.NotFound();
-        })
-        .WithName("GetOpportunityById")
-        .WithOpenApi();
-    }
-
-    private static void GetAllOpportunitiesEndPoint(RouteGroupBuilder group)
-    {
-        group.MapGet("/", async (MyJobContext db) =>
-        {
-            return await db.Opportunities
-            .Select(o => o.ToDTO(db))
-            .ToListAsync();
-        })
-        .WithName("GetAllOpportunities")
         .WithOpenApi();
     }
 }
