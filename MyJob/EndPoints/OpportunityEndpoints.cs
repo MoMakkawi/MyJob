@@ -14,6 +14,7 @@ public static class OpportunityEndpoints
         CreateOpportunityEndPoint(group);
         DeleteOpportunityEndPoint(group);
         SearchOpportunitiesEndPoint(group);
+        GetOpportunityApplicantCVsEndPoint(group);
     }
 
     private static void DeleteOpportunityEndPoint(RouteGroupBuilder group)
@@ -54,6 +55,7 @@ public static class OpportunityEndpoints
                     .SetProperty(m => m.EndDate, opportunity.EndDate)
                     .SetProperty(m => m.Type, opportunity.Type)
                     .SetProperty(m => m.OrganizationFullName, opportunity.OrganizationFullName)
+                    .SetProperty(m =>m.ApplicantsCVIds, opportunity.ApplicantsCVIds)
                     .SetProperty(m => m.OrganizationId, opportunity.OrganizationId)
                     );
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
@@ -61,7 +63,21 @@ public static class OpportunityEndpoints
         .WithName("UpdateOpportunity")
         .WithOpenApi();
     }
+    private static void GetOpportunityApplicantCVsEndPoint(RouteGroupBuilder group)
+    {
+        group.MapGet("/applicants-cv-paths/id={id}", async (int? id, MyJobContext db) =>
+        {
+            var opportunity = await db.Opportunities.FindAsync(id);
 
+            return opportunity is null ? Results.NotFound() :
+            Results.Ok(from applicantsCVId in opportunity.ApplicantsCVIds
+                              from fileData in db.Files
+                              where fileData.Id == applicantsCVId && File.Exists(fileData.Path)
+                              select new { fileData.Path });
+        })
+        .WithName("GetOpportunityApplicantCVs")
+        .WithOpenApi();
+    }
     private static void SearchOpportunitiesEndPoint(RouteGroupBuilder group)
     {
         group.MapGet("/", (

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
+
 namespace MyJob.EndPoints;
 
 public static class OpportunitySeekerEndpoints
@@ -15,7 +16,6 @@ public static class OpportunitySeekerEndpoints
         CreateOpportunitySeekerEndPoint(group);
         DeleteOpportunitySeekerEndPoint(group);
     }
-
     private static void DeleteOpportunitySeekerEndPoint(RouteGroupBuilder group)
     {
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (int id, MyJobContext db) =>
