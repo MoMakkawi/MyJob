@@ -10,9 +10,13 @@ public class MyJobContext(DbContextOptions<MyJobContext> options) : DbContext(op
     public DbSet<Opportunity> Opportunities { get; set; }
     public DbSet<OpportunitySeeker> OpportunitySeekers { get; set; }
     public DbSet<Organization> Organizations { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>()
+            .UseTpcMappingStrategy();
+
         modelBuilder.Entity<Organization>()
             .HasMany(o => o.Opportunities)
             .WithOne()

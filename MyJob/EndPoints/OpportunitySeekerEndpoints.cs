@@ -39,7 +39,7 @@ public static class OpportunitySeekerEndpoints
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/OpportunitySeeker/{opportunitySeeker.Id}", opportunitySeeker);
         })
-        .WithName("CreateOpportunitySeeker")
+        .WithName("RegisterOpportunitySeeker")
         .WithOpenApi();
     }
 

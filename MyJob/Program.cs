@@ -1,3 +1,5 @@
+using System;
+
 using Microsoft.EntityFrameworkCore;
 
 using MyJob.Database;
@@ -26,11 +28,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.Services
+    .CreateScope()
+    .ServiceProvider
+    .GetRequiredService<MyJobContext>()
+    .AdminSeeder();
+
 app.MapFileDataEndpoints();
 app.MapOpportunityEndpoints();
 app.MapOpportunitySeekerEndpoints();
 app.MapOrganizationEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
+
+
+
+
+
 
 

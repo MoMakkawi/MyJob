@@ -11,6 +11,9 @@ namespace MyJob.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateSequence(
+                name: "UserSequence");
+
             migrationBuilder.CreateTable(
                 name: "Files",
                 columns: table => new
@@ -29,9 +32,7 @@ namespace MyJob.Migrations
                 name: "OpportunitySeekers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CVId = table.Column<int>(type: "int", nullable: true),
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [UserSequence]"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -39,7 +40,8 @@ namespace MyJob.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Specialty = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     About = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PictureId = table.Column<int>(type: "int", nullable: true)
+                    PictureId = table.Column<int>(type: "int", nullable: true),
+                    CVId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -60,8 +62,7 @@ namespace MyJob.Migrations
                 name: "Organizations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [UserSequence]"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -76,6 +77,30 @@ namespace MyJob.Migrations
                     table.PrimaryKey("PK_Organizations", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Organizations_Files_PictureId",
+                        column: x => x.PictureId,
+                        principalTable: "Files",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [UserSequence]"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Specialty = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    About = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PictureId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Files_PictureId",
                         column: x => x.PictureId,
                         principalTable: "Files",
                         principalColumn: "Id");
@@ -134,6 +159,11 @@ namespace MyJob.Migrations
                 name: "IX_Organizations_PictureId",
                 table: "Organizations",
                 column: "PictureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_PictureId",
+                table: "Users",
+                column: "PictureId");
         }
 
         /// <inheritdoc />
@@ -143,6 +173,9 @@ namespace MyJob.Migrations
                 name: "Opportunities");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "OpportunitySeekers");
 
             migrationBuilder.DropTable(
@@ -150,6 +183,9 @@ namespace MyJob.Migrations
 
             migrationBuilder.DropTable(
                 name: "Files");
+
+            migrationBuilder.DropSequence(
+                name: "UserSequence");
         }
     }
 }

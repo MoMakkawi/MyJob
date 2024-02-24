@@ -40,7 +40,7 @@ public static class OrganizationEndpoints
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Organization/{organization.Id}", organization);
         })
-        .WithName("CreateOrganization")
+        .WithName("RegisterOrganization")
         .WithOpenApi();
     }
 

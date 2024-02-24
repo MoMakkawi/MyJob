@@ -25,6 +25,8 @@ namespace MyJob.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence("UserSequence");
+
             modelBuilder.Entity("MyJob.Models.FileData", b =>
                 {
                     b.Property<int>("Id")
@@ -86,20 +88,18 @@ namespace MyJob.Migrations
                     b.ToTable("Opportunities");
                 });
 
-            modelBuilder.Entity("MyJob.Models.OpportunitySeeker", b =>
+            modelBuilder.Entity("MyJob.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR [UserSequence]");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
 
                     b.Property<string>("About")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CVId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -130,55 +130,28 @@ namespace MyJob.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CVId");
-
                     b.HasIndex("PictureId");
+
+                    b.ToTable("Users");
+
+                    b.UseTpcMappingStrategy();
+                });
+
+            modelBuilder.Entity("MyJob.Models.OpportunitySeeker", b =>
+                {
+                    b.HasBaseType("MyJob.Models.User");
+
+                    b.Property<int?>("CVId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CVId");
 
                     b.ToTable("OpportunitySeekers");
                 });
 
             modelBuilder.Entity("MyJob.Models.Organization", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("About")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PictureId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Specialty")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PictureId");
+                    b.HasBaseType("MyJob.Models.User");
 
                     b.ToTable("Organizations");
                 });
@@ -194,28 +167,22 @@ namespace MyJob.Migrations
                         .HasForeignKey("OrganizationId");
                 });
 
+            modelBuilder.Entity("MyJob.Models.User", b =>
+                {
+                    b.HasOne("MyJob.Models.FileData", "Picture")
+                        .WithMany()
+                        .HasForeignKey("PictureId");
+
+                    b.Navigation("Picture");
+                });
+
             modelBuilder.Entity("MyJob.Models.OpportunitySeeker", b =>
                 {
                     b.HasOne("MyJob.Models.FileData", "CV")
                         .WithMany()
                         .HasForeignKey("CVId");
 
-                    b.HasOne("MyJob.Models.FileData", "Picture")
-                        .WithMany()
-                        .HasForeignKey("PictureId");
-
                     b.Navigation("CV");
-
-                    b.Navigation("Picture");
-                });
-
-            modelBuilder.Entity("MyJob.Models.Organization", b =>
-                {
-                    b.HasOne("MyJob.Models.FileData", "Picture")
-                        .WithMany()
-                        .HasForeignKey("PictureId");
-
-                    b.Navigation("Picture");
                 });
 
             modelBuilder.Entity("MyJob.Models.OpportunitySeeker", b =>
