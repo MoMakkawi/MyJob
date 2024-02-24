@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
-using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
 public static class OpportunitySeekerEndpoints
@@ -11,8 +10,7 @@ public static class OpportunitySeekerEndpoints
     {
         var group = routes.MapGroup("/api/OpportunitySeeker").WithTags(nameof(OpportunitySeeker));
 
-        GetAllOpportunitySeekersEndPoint(group);
-        GetOpportunitySeekerByIdEndPoint(group);
+        OpportunitySeekersSearchEndPoint(group);
         UpdateOpportunitySeekerEndPoint(group);
         CreateOpportunitySeekerEndPoint(group);
         DeleteOpportunitySeekerEndPoint(group);
@@ -65,29 +63,45 @@ public static class OpportunitySeekerEndpoints
         .WithName("UpdateOpportunitySeeker")
         .WithOpenApi();
     }
-
-    private static void GetOpportunitySeekerByIdEndPoint(RouteGroupBuilder group)
+    private static void OpportunitySeekersSearchEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/{id}", async Task<Results<Ok<OpportunitySeekerDTO>, NotFound>> (int id, MyJobContext db) =>
+        group.MapGet("/search", (
+            int? Id,
+            string? FullName,
+            string? Email,
+            string? PhoneNumber,
+            string? Specialty,
+            int? PracticalExperienceMonthsNumber,
+            int? VolunteerExperienceMonthsNumber,
+            MyJobContext db ) =>
         {
-            return await db.OpportunitySeekers.AsNoTracking()
-                .FirstOrDefaultAsync(model => model.Id == id)
-                is not OpportunitySeeker model ? TypedResults.NotFound()
-                    : TypedResults.Ok(model.ToDTO(db));
-        })
-        .WithName("GetOpportunitySeekerById")
-        .WithOpenApi();
-    }
+            var seekers = db.OpportunitySeekers.AsEnumerable();
 
-    private static void GetAllOpportunitySeekersEndPoint(RouteGroupBuilder group)
-    {
-        group.MapGet("/", async (MyJobContext db) =>
-        {
-            return await db.OpportunitySeekers
-            .Select(os => os.ToDTO(db))
-            .ToListAsync();
+            if (Id is not null)
+                seekers = seekers.Where(os => os.Id == Id);
+
+            if (FullName is not null)
+                seekers = seekers.Where(os => os.FullName == FullName);
+
+            if (Email is not null)
+                seekers = seekers.Where (os => os.Email == Email);
+
+            if (PhoneNumber is not null)
+                seekers = seekers.Where(os => os.PhoneNumber == PhoneNumber);
+
+            if (Specialty is not null)
+                seekers = seekers.Where(os => os.Specialty == Specialty);
+
+            if (PracticalExperienceMonthsNumber is not null)
+                seekers = seekers.Where(os => os.PracticalExperienceMonthsNumber == PracticalExperienceMonthsNumber);
+
+            if (VolunteerExperienceMonthsNumber is not null)
+                seekers = seekers.Where(os => os.VolunteerExperienceMonthsNumber == VolunteerExperienceMonthsNumber);
+
+
+            return seekers.Select(os => os.ToDTO(db));
         })
-        .WithName("GetAllOpportunitySeekers")
+        .WithName("OpportunitySeekersSearch")
         .WithOpenApi();
     }
 }

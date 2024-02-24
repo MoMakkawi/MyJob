@@ -69,7 +69,7 @@ public static class OpportunityEndpoints
     private static void OpportunitiesSearchEndPoint(RouteGroupBuilder group)
     {
   
-        group.MapGet("/search", List<OpportunityDTO> (
+        group.MapGet("/search", (
             int? Id,
             string? Title,
             DateOnly? StartDate,
@@ -107,8 +107,7 @@ public static class OpportunityEndpoints
                 opportunities = opportunities.Where(o => o.OrganizationFullName.Contains(OrganizationFullName));
 
             return opportunities
-            .Select(o => o.ToDTO(db))
-            .ToList();
+            .Select(o => o.ToDTO(db));
         })
         .WithName("OpportunitiesSearch")
         .WithOpenApi();
