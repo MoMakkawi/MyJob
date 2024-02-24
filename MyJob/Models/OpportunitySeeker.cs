@@ -20,13 +20,14 @@ public class OpportunitySeeker : User
     public virtual FileData? CV { get; set; } = null!;
     public int? CVId { get; set; }
 
-    public OpportunitySeekerDTO ToDTO(MyJobContext db)
+    public OpportunitySeekerQueryDTO ToDTO(MyJobContext db)
         => new(Id,
                FirstName,
                Email,
                PhoneNumber,
                Specialty,
                About,
+               Picture?.Id,
                Picture?.Path,
                PracticalExperienceMonthsNumber,
                VolunteerExperienceMonthsNumber,

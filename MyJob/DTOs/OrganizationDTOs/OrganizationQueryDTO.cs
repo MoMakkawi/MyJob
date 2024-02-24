@@ -7,6 +7,8 @@ public record OrganizationQueryDTO(
     string PhoneNumber,
     string Specialty,
     string About,
+
+    int? PictureId,
     string? PictureLink,
 
-    List<OpportunityDTO.OpportunityQueryDTO>? OpportunitiesDTOs);
+    List<OpportunityQueryDTO>? OpportunitiesDTOs);

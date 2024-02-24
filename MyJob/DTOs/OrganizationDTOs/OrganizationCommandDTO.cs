@@ -1,7 +1,6 @@
 ﻿namespace MyJob.DTOs.OrganizationDTOs;
 
 public record OrganizationCommandDTO(
-    int Id,
     string FirstName,
     string LastName,
     string Email,

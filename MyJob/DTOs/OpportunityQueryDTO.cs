@@ -1,6 +1,6 @@
 ﻿using MyJob.Models;
 
-namespace MyJob.DTOs.OpportunityDTO;
+namespace MyJob.DTOs;
 
 public record OpportunityQueryDTO(
     int Id,

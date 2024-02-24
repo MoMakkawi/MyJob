@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
 using MyJob.Database;
-using MyJob.DTOs.OpportunityDTO;
+using MyJob.DTOs;
 
 namespace MyJob.Models;
 

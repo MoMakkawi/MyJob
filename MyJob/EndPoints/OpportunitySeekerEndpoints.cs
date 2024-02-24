@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
+using MyJob.DTOs.OpportunitySeekerDTOs;
 
 namespace MyJob.EndPoints;
 
@@ -31,8 +32,29 @@ public static class OpportunitySeekerEndpoints
 
     private static void CreateOpportunitySeekerEndPoint(RouteGroupBuilder group)
     {
-        group.MapPost("/", async (OpportunitySeeker opportunitySeeker, MyJobContext db) =>
+        group.MapPost("/", async (OpportunitySeekerCommandDTO commandOpportunitySeeker, MyJobContext db) =>
         {
+
+            var experiences =
+            (from opportunity in db.Opportunities.AsEnumerable()
+             from experienceId in commandOpportunitySeeker.ExperiencesIds ?? []
+             where opportunity.Id == experienceId
+             select opportunity).ToList();
+
+            OpportunitySeeker opportunitySeeker = new()
+            {
+                FirstName = commandOpportunitySeeker.FirstName,
+                LastName = commandOpportunitySeeker.LastName,
+                About = commandOpportunitySeeker.About,
+                Email = commandOpportunitySeeker.Email,
+                Password = commandOpportunitySeeker.Password,
+                PhoneNumber = commandOpportunitySeeker.PhoneNumber,
+                Specialty = commandOpportunitySeeker.Specialty,
+                Experiences = experiences,
+                CVId = commandOpportunitySeeker.CVId,
+                PictureId = commandOpportunitySeeker.PictureId
+            };
+
             db.OpportunitySeekers.Add(opportunitySeeker);
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/OpportunitySeeker/{opportunitySeeker.Id}", opportunitySeeker);
@@ -43,22 +65,33 @@ public static class OpportunitySeekerEndpoints
 
     private static void UpdateOpportunitySeekerEndPoint(RouteGroupBuilder group)
     {
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, OpportunitySeeker opportunitySeeker, MyJobContext db) =>
+        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, OpportunitySeekerCommandDTO commandOpportunitySeeker, MyJobContext db) =>
         {
-            var affected = await db.OpportunitySeekers
-                .Where(model => model.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.FirstName, opportunitySeeker.FirstName)
-                    .SetProperty(m => m.LastName, opportunitySeeker.LastName)
-                    .SetProperty(m => m.Email, opportunitySeeker.Email)
-                    .SetProperty(m => m.Password, opportunitySeeker.Password)
-                    .SetProperty(m => m.PhoneNumber, opportunitySeeker.PhoneNumber)
-                    .SetProperty(m => m.Specialty, opportunitySeeker.Specialty)
-                    .SetProperty(m => m.About, opportunitySeeker.About)
-                    .SetProperty(m => m.CVId, opportunitySeeker.CVId)
-                    .SetProperty(m => m.PictureId, opportunitySeeker.PictureId)
-                    );
-            return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
+            var seeker = await db.OpportunitySeekers.FindAsync(id);
+            if(seeker is null) return TypedResults.NotFound();
+
+            seeker.FirstName = commandOpportunitySeeker.FirstName;
+            seeker.LastName = commandOpportunitySeeker.LastName;
+            seeker.Email = commandOpportunitySeeker.Email;
+            seeker.Password = commandOpportunitySeeker.Password;
+            seeker.PhoneNumber = commandOpportunitySeeker.PhoneNumber;
+            seeker.Specialty = commandOpportunitySeeker.Specialty;
+            seeker.About = commandOpportunitySeeker.About;
+
+            seeker.Experiences = (from opportunity in db.Opportunities.AsEnumerable()
+                                  from experienceId in commandOpportunitySeeker.ExperiencesIds ?? []
+                                  where opportunity.Id == experienceId
+                                  select opportunity).ToList();
+
+            seeker.CVId = commandOpportunitySeeker.CVId;
+            seeker.CV = await db.Files.FindAsync(commandOpportunitySeeker.CVId);
+
+            seeker.PictureId = commandOpportunitySeeker.PictureId;
+            seeker.Picture = await db.Files.FindAsync(commandOpportunitySeeker.PictureId);
+
+            await db.SaveChangesAsync();
+
+            return TypedResults.Ok();
         })
         .WithName("UpdateOpportunitySeeker")
         .WithOpenApi();

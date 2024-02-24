@@ -14,6 +14,7 @@ public class Organization : User
                PhoneNumber,
                Specialty,
                About,
+               Picture?.Id,
                Picture?.Path,
                Opportunities.Select(o => o.ToDTO(db)).ToList());
 }
