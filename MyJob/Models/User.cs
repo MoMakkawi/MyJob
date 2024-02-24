@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyJob.Models;
 
@@ -9,8 +10,11 @@ public class User
     public required string LastName { get; set; }
     [NotMapped]
     internal string FullName => FirstName + " " + LastName;
+    [EmailAddress]
     public required string Email { get; set; }
+    [DataType(DataType.Password)]
     public required string Password { get; set; }
+    [DataType(DataType.PhoneNumber)]
     public required string PhoneNumber { get; set; }
     public required string Specialty { get; set; }
     public required string About { get; set; }

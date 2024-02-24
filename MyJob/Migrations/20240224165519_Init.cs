@@ -118,6 +118,7 @@ namespace MyJob.Migrations
                     Type = table.Column<byte>(type: "tinyint", nullable: false),
                     OrganizationFullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrganizationId = table.Column<int>(type: "int", nullable: true),
+                    ApplicantsCVIds = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OpportunitySeekerId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

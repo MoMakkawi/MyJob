@@ -1,6 +1,6 @@
 ﻿namespace MyJob.DTOs.OrganizationDTOs;
 
-public record QueryDTO(
+public record OrganizationQueryDTO(
     int Id,
     string FullName,
     string Email,
@@ -9,4 +9,4 @@ public record QueryDTO(
     string About,
     string? PictureLink,
 
-    List<OpportunityDTO>? OpportunitiesDTOs);
+    List<OpportunityDTO.OpportunityQueryDTO>? OpportunitiesDTOs);

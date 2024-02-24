@@ -21,7 +21,7 @@ public class OpportunitySeeker : User
     public int? CVId { get; set; }
 
     public OpportunitySeekerDTO ToDTO(MyJobContext db)
-        => new (Id,
+        => new(Id,
                FirstName,
                Email,
                PhoneNumber,
@@ -31,5 +31,6 @@ public class OpportunitySeeker : User
                PracticalExperienceMonthsNumber,
                VolunteerExperienceMonthsNumber,
                Experiences.Select(o => o.ToDTO(db)).ToList(),
+               CV?.Id,
                CV?.Path);
 }

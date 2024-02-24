@@ -12,7 +12,7 @@ using MyJob.Database;
 namespace MyJob.Migrations
 {
     [DbContext(typeof(MyJobContext))]
-    [Migration("20240224141505_Init")]
+    [Migration("20240224165519_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -58,6 +58,10 @@ namespace MyJob.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicantsCVIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");

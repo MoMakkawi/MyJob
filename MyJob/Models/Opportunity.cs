@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
 using MyJob.Database;
-using MyJob.DTOs;
+using MyJob.DTOs.OpportunityDTO;
 
 namespace MyJob.Models;
 
@@ -16,6 +16,8 @@ public class Opportunity
     public string OrganizationFullName { get; set; } = string.Empty;
     public int? OrganizationId { get; set; }
 
+    public int[] ApplicantsCVIds { get; set; } = [];
+
     [NotMapped]
     internal int MonthsNumber => GetMonthsNumber();
 
@@ -28,13 +30,14 @@ public class Opportunity
         return (int)Math.Ceiling(daysNumber / 30);
     }
 
-    public OpportunityDTO ToDTO(MyJobContext db)
+    public OpportunityQueryDTO ToDTO(MyJobContext db)
         => new (Id,
                Title,
                StartDate,
                EndDate,
                Type,
                MonthsNumber,
+               ApplicantsCVIds,
                OrganizationId == null ? OrganizationFullName : db.Organizations
                     .FirstOrDefault(o => o.Id == OrganizationId)?.FullName!,
                OrganizationId);

@@ -11,5 +11,6 @@ public record OpportunitySeekerDTO(
 
     int PracticalExperienceMonthsNumber,
     int VolunteerExperienceMonthsNumber,
-    List<OpportunityDTO>? ExperiencesDTOs,
+    List<OpportunityDTO.OpportunityQueryDTO>? ExperiencesDTOs,
+    int? CVId,
     string? CVLink);

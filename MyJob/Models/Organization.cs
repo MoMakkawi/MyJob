@@ -7,7 +7,7 @@ public class Organization : User
 {
     public virtual ICollection<Opportunity> Opportunities { get; set; } = [];
 
-    public QueryDTO ToDTO(MyJobContext db)
+    public OrganizationQueryDTO ToDTO(MyJobContext db)
         => new(Id,
                FirstName,
                Email,

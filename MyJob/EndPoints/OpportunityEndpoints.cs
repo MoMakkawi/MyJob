@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
-using MyJob.DTOs;
 namespace MyJob.EndPoints;
 
 public static class OpportunityEndpoints
@@ -34,10 +33,7 @@ public static class OpportunityEndpoints
     {
         group.MapPost("/", async (Opportunity opportunity, MyJobContext db) =>
         {
-            if (opportunity.OrganizationId is null) db.Opportunities.Add(opportunity);
-            else db.Organizations
-                .First(org => org.Id == opportunity.OrganizationId)
-                .Opportunities.Add(opportunity);
+            db.Opportunities.Add(opportunity);
 
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Opportunity/{opportunity.Id}", opportunity);

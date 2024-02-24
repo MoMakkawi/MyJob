@@ -16,6 +16,7 @@ public static class FileDataEndpoints
         UpdateFileDataEndPoint(group);
         CreateFileDataEndPoint(group);
         DeleteFileDataEndPoint(group);
+        GetFileDataByIdsEndPoint(group);
     }
 
     private static void DeleteFileDataEndPoint(RouteGroupBuilder group)
@@ -115,7 +116,20 @@ public static class FileDataEndpoints
         .WithName("GetFileDataById")
         .WithOpenApi();
     }
-
+    private static void GetFileDataByIdsEndPoint(RouteGroupBuilder group)
+    {
+        group.MapGet("/Ids", (int[] ids, MyJobContext db) =>
+            from id in ids
+            from fileData in db.Files
+            where fileData.Id == id
+            select new FileDataDTO(
+                fileData.Id,
+                fileData.Name,
+                fileData.ContentType,
+                fileData.Path))
+        .WithName("GetFileDataByIds")
+        .WithOpenApi();
+    }
     private static void GetAllFileDataEndPoint(RouteGroupBuilder group)
     {
         group.MapGet("/", async (MyJobContext db) =>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
 using MyJob.DTOs.OrganizationDTOs;
+
 namespace MyJob.EndPoints;
 
 public static class OrganizationEndpoints
@@ -16,9 +17,10 @@ public static class OrganizationEndpoints
         CreateOrganizationEndPoint(group);
         DeleteOrganizationEndPoint(group);
     }
+
     private static void CreateOrganizationEndPoint(RouteGroupBuilder group)
     {
-        group.MapPost("/", async (CommandDTO createOrganizationDTO, MyJobContext db) =>
+        group.MapPost("/", async (OrganizationCommandDTO createOrganizationDTO, MyJobContext db) =>
         {
             var picture = await db.Files
             .FindAsync(createOrganizationDTO.PictureId);
@@ -45,7 +47,7 @@ public static class OrganizationEndpoints
 
     private static void UpdateOrganizationEndPoint(RouteGroupBuilder group)
     {
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, CommandDTO organizationDTO, MyJobContext db) =>
+        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, OrganizationCommandDTO organizationDTO, MyJobContext db) =>
         {
 
             var organizationPicture = db.Organizations
@@ -96,7 +98,7 @@ public static class OrganizationEndpoints
         {
             var organizations = db.Organizations.AsEnumerable();
 
-            if(Id is not null)
+            if (Id is not null)
                 organizations = organizations.Where(o => o.Id == Id);
 
             if (FullName is not null)
@@ -111,10 +113,13 @@ public static class OrganizationEndpoints
             if (PhoneNumber is not null)
                 organizations = organizations.Where(o => o.PhoneNumber == PhoneNumber);
 
-            return organizations.Select(model => model.ToDTO(db));
+            return organizations
+            .Select(model => model.ToDTO(db));
         })
-        .WithName("SearchOrganizations")
+        .WithName("OrganizationsSearch")
         .WithOpenApi();
     }
+
+
 
 }
