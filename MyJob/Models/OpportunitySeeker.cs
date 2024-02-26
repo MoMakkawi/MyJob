@@ -15,14 +15,14 @@ public class OpportunitySeeker : User
     [NotMapped]
     internal int VolunteerExperienceMonthsNumber => Experiences
            .Aggregate(0, (total, experience) =>
-               experience.Type == OpportunityType.volunteer ? total + experience.MonthsNumber : total);
+               experience.Type == OpportunityType.Volunteer ? total + experience.MonthsNumber : total);
     public virtual ICollection<Opportunity> Experiences { get; set; } = [];
     public virtual FileData? CV { get; set; } = null!;
     public int? CVId { get; set; }
 
     public OpportunitySeekerQueryDTO ToDTO(MyJobContext db)
         => new(Id,
-               FirstName,
+               FullName,
                Email,
                PhoneNumber,
                Specialty,

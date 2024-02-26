@@ -12,7 +12,7 @@ using MyJob.Database;
 namespace MyJob.Migrations
 {
     [DbContext(typeof(MyJobContext))]
-    [Migration("20240224183047_Init")]
+    [Migration("20240304124121_Init")]
     partial class Init
     {
         /// <inheritdoc />

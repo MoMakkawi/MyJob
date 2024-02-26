@@ -1,4 +1,6 @@
-﻿namespace MyJob.DTOs.OrganizationDTOs;
+﻿using MyJob.DTOs.OpportunityDTOs;
+
+namespace MyJob.DTOs.OrganizationDTOs;
 
 public record OrganizationQueryDTO(
     int Id,

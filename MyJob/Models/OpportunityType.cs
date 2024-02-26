@@ -3,5 +3,5 @@
 public enum OpportunityType : byte
 {
     Work,
-    volunteer
+    Volunteer
 }

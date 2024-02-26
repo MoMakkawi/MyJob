@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using MyJob.Database;
 using MyJob.Models;
+using MyJob.DTOs.OpportunityDTOs;
 namespace MyJob.EndPoints;
 
 public static class OpportunityEndpoints
@@ -32,8 +33,31 @@ public static class OpportunityEndpoints
 
     private static void CreateOpportunityEndPoint(RouteGroupBuilder group)
     {
-        group.MapPost("/", async (Opportunity opportunity, MyJobContext db) =>
+        group.MapPost("/", async Task<Results<Created<Opportunity>, BadRequest>> (OpportunityCommandDTO opportunityDTO, MyJobContext db) =>
         {
+            if (opportunityDTO is { OrganizationId: null, OrganizationFullName: null })
+                return TypedResults.BadRequest();
+
+            var organizationFullName = opportunityDTO.OrganizationFullName;
+            if (opportunityDTO.OrganizationId is not null)
+            {
+                var organization = await db.Organizations
+                    .FindAsync(opportunityDTO.OrganizationId);
+
+                if (organization is not null)
+                    organizationFullName = organization.FullName;
+            }
+
+            var opportunity = new Opportunity()
+            {
+                StartDate = opportunityDTO.StartDate,
+                EndDate = opportunityDTO.EndDate,
+                OrganizationFullName = organizationFullName ?? string.Empty,
+                OrganizationId = opportunityDTO.OrganizationId,
+                Title = opportunityDTO.Title,
+                Type = opportunityDTO.Type
+            };
+
             db.Opportunities.Add(opportunity);
 
             await db.SaveChangesAsync();
