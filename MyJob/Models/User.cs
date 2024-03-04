@@ -6,10 +6,7 @@ namespace MyJob.Models;
 public class User
 {
     public int Id { get; set; }
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    [NotMapped]
-    internal string FullName => FirstName + " " + LastName;
+    public required string FullName { get; set; }
     [EmailAddress]
     public required string Email { get; set; }
     [DataType(DataType.Password)]

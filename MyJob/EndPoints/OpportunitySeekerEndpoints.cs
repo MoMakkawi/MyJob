@@ -43,8 +43,7 @@ public static class OpportunitySeekerEndpoints
 
             OpportunitySeeker opportunitySeeker = new()
             {
-                FirstName = commandOpportunitySeeker.FirstName,
-                LastName = commandOpportunitySeeker.LastName,
+                FullName = commandOpportunitySeeker.FullName,
                 About = commandOpportunitySeeker.About,
                 Email = commandOpportunitySeeker.Email,
                 Password = commandOpportunitySeeker.Password,
@@ -70,8 +69,7 @@ public static class OpportunitySeekerEndpoints
             var seeker = await db.OpportunitySeekers.FindAsync(id);
             if(seeker is null) return TypedResults.NotFound();
 
-            seeker.FirstName = commandOpportunitySeeker.FirstName;
-            seeker.LastName = commandOpportunitySeeker.LastName;
+            seeker.FullName = commandOpportunitySeeker.FullName;
             seeker.Email = commandOpportunitySeeker.Email;
             seeker.Password = commandOpportunitySeeker.Password;
             seeker.PhoneNumber = commandOpportunitySeeker.PhoneNumber;

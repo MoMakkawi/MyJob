@@ -1,8 +1,7 @@
 ﻿namespace MyJob.DTOs.OpportunitySeekerDTOs;
 
 public record OpportunitySeekerCommandDTO(
-    string FirstName, 
-    string LastName,
+    string FullName, 
     string Email,
     string Password,
     string PhoneNumber,

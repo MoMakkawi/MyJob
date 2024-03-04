@@ -27,8 +27,7 @@ public static class OrganizationEndpoints
 
             var organization = new Organization()
             {
-                FirstName = createOrganizationDTO.FirstName,
-                LastName = createOrganizationDTO.LastName,
+                FullName = createOrganizationDTO.FullName,
                 Email = createOrganizationDTO.Email,
                 About = createOrganizationDTO.About,
                 Password = createOrganizationDTO.Password,
@@ -58,8 +57,7 @@ public static class OrganizationEndpoints
             var affected = await db.Organizations
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(m => m.FirstName, organizationDTO.FirstName)
-                    .SetProperty(m => m.LastName, organizationDTO.LastName)
+                    .SetProperty(m => m.FullName, organizationDTO.FullName)
                     .SetProperty(m => m.Email, organizationDTO.Email)
                     .SetProperty(m => m.Password, organizationDTO.Password)
                     .SetProperty(m => m.PhoneNumber, organizationDTO.PhoneNumber)

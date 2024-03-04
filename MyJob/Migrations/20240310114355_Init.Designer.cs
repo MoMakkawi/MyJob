@@ -12,7 +12,7 @@ using MyJob.Database;
 namespace MyJob.Migrations
 {
     [DbContext(typeof(MyJobContext))]
-    [Migration("20240304124121_Init")]
+    [Migration("20240310114355_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -112,11 +112,7 @@ namespace MyJob.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

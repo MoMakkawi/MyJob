@@ -8,8 +8,7 @@ internal static class Seeder
     {
         var admin = new User()
         {
-            FirstName = "MyJob",
-            LastName = "Admin",
+            FullName = "MyJob Admin",
             Email = "Admin@MyJob.com",
             Password = "MoMakkawi951753.",
             About = "Admin Account",

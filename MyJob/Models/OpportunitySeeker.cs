@@ -7,6 +7,7 @@ namespace MyJob.Models;
 
 public class OpportunitySeeker : User
 {
+
     [NotMapped]
     internal int PracticalExperienceMonthsNumber => Experiences
            .Aggregate(0, (total, experience) =>
