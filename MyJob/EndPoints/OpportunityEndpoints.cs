@@ -89,16 +89,34 @@ public static class OpportunityEndpoints
     }
     private static void GetOpportunityApplicantCVsEndPoint(RouteGroupBuilder group)
     {
-        group.MapGet("/applicants/id={id}", async (int? id, MyJobContext db) =>
+        group.MapGet("/applicants/id={id}", async (
+            int id,
+            string? Specialty,
+            int? PracticalExperienceMonthsNumber,
+            int? VolunteerExperienceMonthsNumber,
+            MyJobContext db) =>
         {
             var opportunity = await db.Opportunities.FindAsync(id);
 
-            return opportunity is null ? Results.NotFound() :
-            Results.Ok(from applicantId in opportunity.ApplicantsIds
-                        from seeker in db.OpportunitySeekers
-                        where seeker.Id == applicantId &&
-                              seeker.CV is not null &&
-                              File.Exists(seeker.CV.Path)
+            if (opportunity is null) return Results.NotFound();
+
+            var seekers = 
+            from applicantId in opportunity.ApplicantsIds
+            from seeker in db.OpportunitySeekers
+            where seeker.Id == applicantId && seeker.CV is not null && File.Exists(seeker.CV.Path)
+            select seeker;
+
+            if (Specialty is not null)
+                seekers = seekers.Where(os => os.Specialty.Contains(Specialty));
+
+            if (PracticalExperienceMonthsNumber is not null)
+                seekers = seekers.Where(os => os.PracticalExperienceMonthsNumber >= PracticalExperienceMonthsNumber);
+
+            if (VolunteerExperienceMonthsNumber is not null)
+                seekers = seekers.Where(os => os.VolunteerExperienceMonthsNumber >= VolunteerExperienceMonthsNumber);
+
+
+            return Results.Ok(from seeker in seekers
                         select new
                         {
                             seeker.Id,

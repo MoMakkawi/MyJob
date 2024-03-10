@@ -121,13 +121,13 @@ public static class OpportunitySeekerEndpoints
                 seekers = seekers.Where(os => os.PhoneNumber == PhoneNumber);
 
             if (Specialty is not null)
-                seekers = seekers.Where(os => os.Specialty == Specialty);
+                seekers = seekers.Where(os => os.Specialty.Contains(Specialty));
 
             if (PracticalExperienceMonthsNumber is not null)
-                seekers = seekers.Where(os => os.PracticalExperienceMonthsNumber == PracticalExperienceMonthsNumber);
+                seekers = seekers.Where(os => os.PracticalExperienceMonthsNumber >= PracticalExperienceMonthsNumber);
 
             if (VolunteerExperienceMonthsNumber is not null)
-                seekers = seekers.Where(os => os.VolunteerExperienceMonthsNumber == VolunteerExperienceMonthsNumber);
+                seekers = seekers.Where(os => os.VolunteerExperienceMonthsNumber >= VolunteerExperienceMonthsNumber);
 
 
             return seekers.Select(os => os.ToDTO(db));
